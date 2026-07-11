@@ -9,72 +9,163 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Converter" />
-<meta name="theme-color" content="#1e293b" />
+<meta name="theme-color" content="#0b1120" />
 <link rel="apple-touch-icon" href="icon.png" />
 <link rel="icon" href="icon.png" />
 <style>
 :root{
-  --card:#ffffff;--ink:#0f172a;--muted:#64748b;--line:#e2e8f0;
-  --brand:#4f46e5;--brand-soft:#eef2ff;--result-bg:#f8fafc;
-  --summary-bg:#ecfdf5;--summary-line:#a7f3d0;--summary-ink:#065f46;
-  --radius:14px;--shadow:0 10px 30px rgba(2,6,23,.18);
+  /* ---- Design tokens ---- */
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji",sans-serif;
+
+  /* spacing scale (4px base) */
+  --s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:20px;--s6:24px;--s8:32px;
+
+  /* radii */
+  --r-sm:10px;--r-md:14px;--r-lg:20px;--r-pill:999px;
+
+  /* palette — dark (default) */
+  --bg-1:#0b1120;--bg-2:#1e1b4b;
+  --card:#ffffff;
+  --ink:#0f172a;--ink-soft:#334155;--muted:#64748b;--line:#e6e8ee;
+  --brand:#4f46e5;--brand-2:#7c3aed;--brand-ink:#4338ca;--brand-soft:#eef2ff;
+  --result-bg:#f5f3ff;--result-line:#ddd6fe;
+  --field-bg:#f8fafc;
+  --header-ink:#ffffff;--header-sub:rgba(226,232,240,.82);
+  --chev:'%2364748b';
+
+  --shadow-card:0 20px 45px -20px rgba(2,6,23,.65),0 6px 16px -8px rgba(2,6,23,.4);
+  --shadow-pop:0 8px 24px -10px rgba(79,70,229,.55);
 }
-/* Light theme overrides (toggled via body.light) */
+/* Light theme */
 body.light{
-  --card:#ffffff;--ink:#0f172a;--muted:#64748b;--line:#e2e8f0;
-  --brand:#4f46e5;--brand-soft:#eef2ff;--result-bg:#f1f5f9;
+  --bg-1:#eef2ff;--bg-2:#c7d2fe;
+  --card:#ffffff;
+  --result-bg:#f5f3ff;--result-line:#ddd6fe;--field-bg:#f8fafc;
+  --header-ink:#1e1b4b;--header-sub:rgba(30,27,75,.7);
+  --shadow-card:0 20px 45px -24px rgba(49,46,129,.45),0 6px 16px -10px rgba(49,46,129,.3);
 }
+
 *{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
 body{
-  margin:0;min-height:100vh;
-  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  color:var(--ink);
-  /* Dark (default) gradient. Full gradients per-theme so iOS repaints reliably. */
-  background:linear-gradient(160deg,#1e293b 0%,#4f46e5 100%);
-  display:flex;justify-content:center;padding:32px 16px;
-  padding-top:max(32px,env(safe-area-inset-top));
+  margin:0;min-height:100vh;font-family:var(--font);color:var(--ink);
+  background:
+    radial-gradient(1200px 600px at 15% -10%, rgba(124,58,237,.35), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, rgba(79,70,229,.30), transparent 55%),
+    linear-gradient(165deg,var(--bg-1) 0%,var(--bg-2) 100%);
+  background-attachment:fixed;
+  display:flex;justify-content:center;
+  padding:clamp(16px,4vw,40px) 16px;
+  padding-top:max(clamp(16px,4vw,40px),env(safe-area-inset-top));
+  -webkit-font-smoothing:antialiased;
 }
-body.light{background:linear-gradient(160deg,#e0e7ff 0%,#a5b4fc 100%)}
-.app{width:100%;max-width:720px}
-.topbar{display:flex;align-items:center;justify-content:center;position:relative;margin-bottom:6px}
+.app{width:100%;max-width:560px}
+
+/* ---- Header ---- */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--s2)}
+.brand{display:flex;align-items:center;gap:var(--s2);color:var(--header-ink);font-weight:700;font-size:1.35rem;letter-spacing:-.02em}
+.brand-mark{
+  display:grid;place-items:center;width:34px;height:34px;border-radius:11px;
+  background:linear-gradient(150deg,var(--brand),var(--brand-2));color:#fff;
+  font-size:1.05rem;box-shadow:var(--shadow-pop)
+}
 .theme-toggle{
-  position:absolute;right:0;top:0;border:1px solid rgba(255,255,255,.35);
-  background:rgba(255,255,255,.12);color:#fff;border-radius:999px;
-  padding:6px 12px;font-size:.85rem;cursor:pointer
+  border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.10);color:var(--header-ink);
+  border-radius:var(--r-pill);padding:7px 13px;font-size:.82rem;font-weight:600;cursor:pointer;
+  backdrop-filter:blur(6px);transition:background .15s ease,transform .1s ease
 }
-body.light .theme-toggle{border-color:rgba(15,23,42,.2);background:rgba(255,255,255,.5);color:#1e293b}
-.header{text-align:center;color:#fff;margin-bottom:20px}
-body.light .header{color:#1e293b}
-.header h1{margin:0;font-size:2rem;letter-spacing:-.02em}
-.tagline{margin:6px 0 0;opacity:.85}
-.tabs{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:18px}
-.tab{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(255,255,255,.25);
-  background:rgba(255,255,255,.08);color:#fff;padding:8px 12px;border-radius:999px;cursor:pointer;
-  font-size:.85rem;transition:all .15s ease}
-body.light .tab{border-color:rgba(15,23,42,.15);background:rgba(255,255,255,.45);color:#1e293b}
+.theme-toggle:hover{background:rgba(255,255,255,.2)}
+.theme-toggle:active{transform:scale(.96)}
+body.light .theme-toggle{border-color:rgba(30,27,75,.18);background:rgba(255,255,255,.55)}
+.tagline{margin:0 0 var(--s5);color:var(--header-sub);font-size:.95rem;padding-left:calc(34px + var(--s2))}
+
+/* ---- Tabs (scroll on mobile) ---- */
+.tabs{
+  display:flex;gap:var(--s2);margin-bottom:var(--s4);
+  overflow-x:auto;padding:var(--s1) var(--s1) var(--s3);
+  scrollbar-width:none;-webkit-overflow-scrolling:touch;
+  scroll-snap-type:x proximity;
+}
+.tabs::-webkit-scrollbar{display:none}
+.tab{
+  flex:0 0 auto;scroll-snap-align:start;display:inline-flex;align-items:center;gap:6px;
+  border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);color:#fff;
+  padding:9px 14px;border-radius:var(--r-pill);cursor:pointer;font-size:.86rem;font-weight:500;
+  white-space:nowrap;transition:background .15s ease,color .15s ease,transform .1s ease,box-shadow .15s ease;
+}
+body.light .tab{border-color:rgba(30,27,75,.12);background:rgba(255,255,255,.5);color:#312e81}
 .tab:hover{background:rgba(255,255,255,.18)}
-body.light .tab:hover{background:rgba(255,255,255,.7)}
-.tab.active{background:#fff;color:var(--brand);border-color:#fff;font-weight:600}
-.tab-icon{font-size:1rem}
-.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px}
-.row{display:grid;grid-template-columns:1fr 1.3fr;gap:16px}
-.field{display:flex;flex-direction:column;gap:6px}
-.field-label{font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600}
-.input,.select{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;
-  font-size:1rem;background:#fff;color:var(--ink)}
-.input:focus,.select:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
-.result{display:flex;align-items:center;padding:12px 14px;border:1px dashed var(--line);border-radius:10px;
-  background:var(--result-bg);font-size:1.15rem;font-weight:700;color:var(--brand);min-height:48px;overflow-wrap:anywhere}
-.swap-row{display:flex;justify-content:center;margin:14px 0}
-.swap-btn{border:1px solid var(--line);background:var(--brand-soft);color:var(--brand);padding:8px 16px;
-  border-radius:999px;cursor:pointer;font-weight:600;transition:all .15s ease}
-.swap-btn:hover{background:var(--brand);color:#fff}
-.summary{margin:18px 0 0;padding:14px;background:var(--summary-bg);border:1px solid var(--summary-line);border-radius:10px;
-  text-align:center;color:var(--summary-ink);overflow-wrap:anywhere}
-.note{margin:14px 0 0;font-size:.85rem;color:var(--muted);line-height:1.4}
-.footer{margin-top:18px;text-align:center;color:rgba(255,255,255,.75);font-size:.8rem}
-body.light .footer{color:rgba(30,41,59,.7)}
-@media(max-width:520px){.row{grid-template-columns:1fr}.header h1{font-size:1.6rem}}
+body.light .tab:hover{background:rgba(255,255,255,.8)}
+.tab:active{transform:scale(.97)}
+.tab.active{background:#fff;color:var(--brand-ink);border-color:#fff;font-weight:700;box-shadow:var(--shadow-pop)}
+.tab-icon{font-size:1rem;line-height:1}
+
+/* ---- Card ---- */
+.card{background:var(--card);border-radius:var(--r-lg);box-shadow:var(--shadow-card);padding:var(--s6)}
+
+.controls{display:grid;gap:var(--s4)}
+.pair{display:grid;grid-template-columns:1fr 1.25fr;gap:var(--s4)}
+.field{display:flex;flex-direction:column;gap:var(--s2);min-width:0}
+.field-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700}
+
+.input,.select{
+  width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:var(--r-sm);
+  font-size:1rem;font-family:inherit;background:var(--field-bg);color:var(--ink);
+  transition:border-color .15s ease,box-shadow .15s ease,background .15s ease;
+}
+.input{font-variant-numeric:tabular-nums;font-weight:600}
+.input:focus,.select:focus{outline:none;border-color:var(--brand);background:#fff;box-shadow:0 0 0 4px var(--brand-soft)}
+
+/* custom select chevron */
+.select-wrap{position:relative}
+.select{
+  appearance:none;-webkit-appearance:none;padding-right:38px;cursor:pointer;text-overflow:ellipsis;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;
+}
+
+/* swap */
+.swap-row{display:flex;align-items:center;gap:var(--s3);margin:calc(var(--s1)*-1) 0}
+.swap-row::before,.swap-row::after{content:"";height:1px;flex:1;background:var(--line)}
+.swap-btn{
+  flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;
+  border:1px solid var(--result-line);background:var(--brand-soft);color:var(--brand-ink);
+  padding:9px 18px;border-radius:var(--r-pill);cursor:pointer;font-weight:700;font-size:.9rem;
+  transition:background .15s ease,color .15s ease,transform .12s ease,box-shadow .15s ease;
+}
+.swap-btn:hover{background:var(--brand);color:#fff;box-shadow:var(--shadow-pop)}
+.swap-btn:active{transform:rotate(180deg) scale(.96)}
+.swap-ico{font-size:1.05rem;line-height:1}
+
+/* ---- Hero result ---- */
+.hero{
+  margin-top:var(--s5);border:1px solid var(--result-line);border-radius:var(--r-md);
+  background:
+    radial-gradient(120% 140% at 100% 0%, rgba(124,58,237,.10), transparent 55%),
+    var(--result-bg);
+  padding:var(--s5) var(--s6);text-align:center;
+}
+.hero-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--brand-ink);font-weight:700;opacity:.85}
+.hero-value{
+  margin-top:var(--s2);font-size:clamp(2.2rem,9vw,3rem);line-height:1.05;font-weight:800;letter-spacing:-.03em;
+  color:var(--brand);font-variant-numeric:tabular-nums;word-break:break-word;
+}
+.hero-unit{margin-top:var(--s1);font-size:1rem;font-weight:600;color:var(--ink-soft)}
+.hero-eq{margin-top:var(--s3);font-size:.86rem;color:var(--muted)}
+.hero.empty .hero-value{color:var(--line)}
+
+.note{
+  margin:var(--s4) 0 0;font-size:.82rem;color:var(--muted);line-height:1.5;
+  padding:var(--s3);background:var(--field-bg);border-radius:var(--r-sm);border:1px solid var(--line);
+}
+
+.footer{margin-top:var(--s5);text-align:center;color:var(--header-sub);font-size:.78rem}
+
+@media(max-width:480px){
+  .card{padding:var(--s5)}
+  .pair{grid-template-columns:1fr}
+  .tagline{padding-left:0}
+}
 </style>
 </head>
 <body>
@@ -174,7 +265,7 @@ function toggleTheme(){
   const light=document.body.classList.contains('light');
   try{ localStorage.setItem('uc-theme', light?'light':'dark'); }catch(e){}
   const meta=document.querySelector('meta[name="theme-color"]');
-  if(meta) meta.setAttribute('content', light?'#e0e7ff':'#1e293b');
+  if(meta) meta.setAttribute('content', light?'#eef2ff':'#0b1120');
   const btn=document.getElementById('themeBtn'); if(btn) btn.textContent=light?'🌙 Dark':'☀️ Light';
 }
 
@@ -191,34 +282,44 @@ function render(){
   root.innerHTML=`
   <div class="app">
     <div class="topbar">
+      <div class="brand"><span class="brand-mark">⇅</span> Unit Converter</div>
       <button class="theme-toggle" id="themeBtn">${light?'🌙 Dark':'☀️ Light'}</button>
     </div>
-    <header class="header">
-      <h1>Unit Converter</h1>
-      <p class="tagline">Convert common measurements quickly.</p>
-    </header>
-    <nav class="tabs">
+    <p class="tagline">Convert common measurements quickly.</p>
+
+    <nav class="tabs" aria-label="Categories">
       ${CATEGORIES.map(c=>`<button class="tab ${c.id===state.categoryId?'active':''}" data-cat="${c.id}">
         <span class="tab-icon">${c.icon}</span><span>${c.name}</span></button>`).join('')}
     </nav>
+
     <main class="card">
-      <div class="row">
-        <label class="field"><span class="field-label">Amount</span>
-          <input class="input" id="amount" type="number" inputmode="decimal" value="${state.amount}" placeholder="Enter a value"/></label>
-        <label class="field"><span class="field-label">From</span>
-          <select class="select" id="from">${opts(from)}</select></label>
-      </div>
-      <div class="swap-row"><button class="swap-btn" id="swap">⇅ Swap</button></div>
-      <div class="row">
-        <div class="field"><span class="field-label">Result</span>
-          <output class="result">${hasResult?formatResult(result):'—'}</output></div>
+      <div class="controls">
+        <div class="pair">
+          <label class="field"><span class="field-label">Amount</span>
+            <input class="input" id="amount" type="number" inputmode="decimal" value="${state.amount}" placeholder="Enter a value"/></label>
+          <label class="field"><span class="field-label">From</span>
+            <span class="select-wrap"><select class="select" id="from">${opts(from)}</select></span></label>
+        </div>
+
+        <div class="swap-row">
+          <button class="swap-btn" id="swap" aria-label="Swap units" title="Swap units">
+            <span class="swap-ico">⇅</span> Swap</button>
+        </div>
+
         <label class="field"><span class="field-label">To</span>
-          <select class="select" id="to">${opts(to)}</select></label>
+          <span class="select-wrap"><select class="select" id="to">${opts(to)}</select></span></label>
       </div>
-      ${hasResult?`<p class="summary">${formatResult(Number(state.amount))} ${stripParens(fromName)} =
-        <strong>${formatResult(result)} ${stripParens(toName)}</strong></p>`:''}
+
+      <div class="hero ${hasResult?'':'empty'}">
+        <div class="hero-label">Result</div>
+        <div class="hero-value">${hasResult?formatResult(result):'—'}</div>
+        ${hasResult?`<div class="hero-unit">${stripParens(toName)}</div>`:''}
+        ${hasResult?`<div class="hero-eq">${formatResult(Number(state.amount))} ${stripParens(fromName)} = ${formatResult(result)} ${stripParens(toName)}</div>`:''}
+      </div>
+
       ${cat.note?`<p class="note">ℹ️ ${cat.note}</p>`:''}
     </main>
+
     <footer class="footer">Runs entirely on your device — no internet needed.</footer>
   </div>`;
 
