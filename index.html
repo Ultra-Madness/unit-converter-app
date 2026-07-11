@@ -161,6 +161,7 @@ body.light .tab:hover{background:rgba(255,255,255,.8)}
 }
 
 .footer{margin-top:var(--s5);text-align:center;color:var(--header-sub);font-size:.78rem}
+.ver{opacity:.6}
 
 @media(max-width:480px){
   .card{padding:var(--s5)}
@@ -270,13 +271,36 @@ function toggleTheme(){
   const btn=document.getElementById('themeBtn'); if(btn) btn.textContent=light?'🌙 Dark':'☀️ Light';
 }
 
-function render(){
+/* Recompute the current conversion (pure, no DOM). */
+function currentView(){
   const cat=CATEGORIES.find(c=>c.id===state.categoryId);
   const {from,to}=state.sel[state.categoryId];
   const result=convert(cat,from,to,state.amount);
   const hasResult=state.amount!==''&&isFinite(result);
   const fromName=cat.units.find(u=>u.id===from)?.name||'';
   const toName=cat.units.find(u=>u.id===to)?.name||'';
+  return {cat,from,to,result,hasResult,fromName,toName};
+}
+/* Inner HTML of the result panel — reused by render() and updateResult(). */
+function heroInner(v){
+  return `
+        <div class="hero-label">Result</div>
+        <div class="hero-value">${v.hasResult?formatResult(v.result):'—'}</div>
+        ${v.hasResult?`<div class="hero-unit">${stripParens(v.toName)}</div>`:''}
+        ${v.hasResult?`<div class="hero-eq">${formatResult(Number(state.amount))} ${stripParens(v.fromName)} = ${formatResult(v.result)} ${stripParens(v.toName)}</div>`:''}`;
+}
+/* Update ONLY the result panel — never touches the input, so the caret stays put. */
+function updateResult(){
+  const v=currentView();
+  const hero=document.querySelector('.hero');
+  if(!hero) return;
+  hero.className='hero '+(v.hasResult?'':'empty');
+  hero.innerHTML=heroInner(v);
+}
+
+function render(){
+  const v=currentView();
+  const cat=v.cat, from=v.from, to=v.to;
   const opts=sel=>cat.units.map(u=>`<option value="${u.id}" ${u.id===sel?'selected':''}>${u.name}</option>`).join('');
   const light=document.body.classList.contains('light');
 
@@ -311,34 +335,26 @@ function render(){
           <span class="select-wrap"><select class="select" id="to">${opts(to)}</select></span></label>
       </div>
 
-      <div class="hero ${hasResult?'':'empty'}">
-        <div class="hero-label">Result</div>
-        <div class="hero-value">${hasResult?formatResult(result):'—'}</div>
-        ${hasResult?`<div class="hero-unit">${stripParens(toName)}</div>`:''}
-        ${hasResult?`<div class="hero-eq">${formatResult(Number(state.amount))} ${stripParens(fromName)} = ${formatResult(result)} ${stripParens(toName)}</div>`:''}
-      </div>
+      <div class="hero ${v.hasResult?'':'empty'}">${heroInner(v)}</div>
 
       ${cat.note?`<p class="note">ℹ️ ${cat.note}</p>`:''}
     </main>
 
-    <footer class="footer">Runs entirely on your device — no internet needed.</footer>
+    <footer class="footer">Runs entirely on your device — no internet needed. <span class="ver">· v1.1</span></footer>
   </div>`;
 
   document.getElementById('themeBtn').onclick=toggleTheme;
   root.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{state.categoryId=b.dataset.cat;render();});
-  document.getElementById('amount').oninput=e=>{state.amount=e.target.value;update();};
-  document.getElementById('from').onchange=e=>{state.sel[state.categoryId].from=e.target.value;update();};
-  document.getElementById('to').onchange=e=>{state.sel[state.categoryId].to=e.target.value;update();};
+  // Typing only updates the result — the input element is never rebuilt, so the caret behaves normally.
+  document.getElementById('amount').oninput=e=>{state.amount=e.target.value;updateResult();};
+  document.getElementById('from').onchange=e=>{state.sel[state.categoryId].from=e.target.value;updateResult();};
+  document.getElementById('to').onchange=e=>{state.sel[state.categoryId].to=e.target.value;updateResult();};
   document.getElementById('swap').onclick=()=>{
-    const s=state.sel[state.categoryId];[s.from,s.to]=[s.to,s.from];render();
+    const s=state.sel[state.categoryId];[s.from,s.to]=[s.to,s.from];
+    document.getElementById('from').value=s.from;
+    document.getElementById('to').value=s.to;
+    updateResult();
   };
-}
-/* Light update that preserves focus/caret in the amount box while typing. */
-function update(){
-  const active=document.activeElement, isAmount=active&&active.id==='amount';
-  const pos=isAmount?active.selectionStart:null;
-  render();
-  if(isAmount){const a=document.getElementById('amount');a.focus();try{a.setSelectionRange(pos,pos);}catch(e){}}
 }
 loadTheme();
 render();
