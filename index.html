@@ -161,7 +161,12 @@ body.light .tab:hover{background:rgba(255,255,255,.8)}
 }
 
 .footer{margin-top:var(--s5);text-align:center;color:var(--header-sub);font-size:.78rem}
-.ver{opacity:.6}
+.ver-badge{
+  font-size:.62rem;font-weight:700;letter-spacing:.03em;vertical-align:middle;
+  padding:3px 7px;border-radius:var(--r-pill);
+  background:linear-gradient(150deg,var(--brand),var(--brand-2));color:#fff;
+  box-shadow:var(--shadow-pop);
+}
 
 @media(max-width:480px){
   .card{padding:var(--s5)}
@@ -250,6 +255,9 @@ function formatResult(n){
 }
 function stripParens(name){return name.replace(/\s*\(.*?\)\s*/g,' ').trim();}
 
+/* ---- Version (bump this on every update; shown next to the title) ---- */
+const VERSION='1.2';
+
 /* ---- State ---- */
 const state={
   categoryId:CATEGORIES[0].id,
@@ -307,7 +315,7 @@ function render(){
   root.innerHTML=`
   <div class="app">
     <div class="topbar">
-      <div class="brand"><span class="brand-mark">⇅</span> Unit Converter</div>
+      <div class="brand"><span class="brand-mark">⇅</span> Unit Converter <span class="ver-badge">v${VERSION}</span></div>
       <button class="theme-toggle" id="themeBtn">${light?'🌙 Dark':'☀️ Light'}</button>
     </div>
     <p class="tagline">Convert common measurements quickly.</p>
@@ -340,7 +348,7 @@ function render(){
       ${cat.note?`<p class="note">ℹ️ ${cat.note}</p>`:''}
     </main>
 
-    <footer class="footer">Runs entirely on your device — no internet needed. <span class="ver">· v1.1</span></footer>
+    <footer class="footer">Runs entirely on your device — no internet needed.</footer>
   </div>`;
 
   document.getElementById('themeBtn').onclick=toggleTheme;
